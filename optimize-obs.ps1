@@ -1576,6 +1576,7 @@ OutputCY=$DefaultHeight
         $glob | Out-IniFile -FilePath $global -Force
     }
     Write-Warning "Ignore Error Messages, everything is working lol"
+    Write-Warning "Always Run OBS as Admin"
     Write-Warning "Set a Key to Save Replay in Hotkeys and Push-To-Talk if needed"
     Write-Warning "Set Process Priority to Normal and Disable Browser Source Hardware Acceleration in Advanced"
     Write-Warning "Separate Audio Tracks and Select Which Ones to Record/Stream"
