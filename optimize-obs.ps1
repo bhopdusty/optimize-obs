@@ -820,14 +820,14 @@ function Optimize-OBS {
     #>
     [alias('optobs')]
     param(
-        [ValidateSet('test')]
+        [ValidateSet('SinglePCQuality', 'SinglePCPerformance', 'DualPCCPU', 'DualPCGPU', '120FPSRB', '240FPSRB')]
         [String]$Encoder,
         
         [ValidateScript({Test-Path -Path $_ -PathType Leaf})]
         [String]$OBS64Path,
 
-        [ValidateSet('HighPerformance')]
-        [String]$Preset = 'HighPerformance',
+        [ValidateSet('OptimizeOBS')]
+        [String]$Preset = 'OptimizeOBS',
 
         [ValidateSet(
             'EnableStatsDock', 'OldDarkTheme')]
@@ -840,7 +840,12 @@ function Optimize-OBS {
 
     if (!$Encoder){
         $Encoders = [Ordered]@{
-            "test" = "test"
+            "Single PC Quality" = "SinglePCQuality"
+            "Single PC Performance" = "SinglePCPerformance"
+            "Dual PC CPU Streaming" = "DualPCCPU"
+            "Dual PC GPU Streaming" = "DualPCGPU"
+            "120FPS Replay Buffer" = "120FPSRB"
+            "240FPS Replay Buffer" = "240FPSRB"
         }
         Write-Host "Select what OBS will use to record (use arrow keys and press ENTER to confirm)"
         $Key = Menu ([Collections.ArrayList]$Encoders.Keys)
@@ -848,8 +853,8 @@ function Optimize-OBS {
     }
 
     $OBSPatches = @{
-        HighPerformance = @{
-            test = @{
+        OptimizeOBS = @{
+            SinglePCQuality = @{
                 basic = @{
                     Video = @{
                         BaseCX=1920
@@ -941,10 +946,10 @@ function Optimize-OBS {
                     preset2='p7'
                     multipass='disabled'
                     lookahead='disabled'
-                    tune=11
+                    tune='hq'
                 }
             }
-            SinglePCRecording = @{
+            SinglePCPerformance = @{
                 basic = @{
                     Video = @{
                         BaseCX=1920
@@ -975,93 +980,414 @@ function Optimize-OBS {
                         BindIP='default'
                         NewSocketLoopEnable='false'
                         LowLatencyEnable='false'
+                        Mode='Advanced'
                     }
                     AdvOut = @{
-                        ApplyServiceSettings='true'
+                        AudioEncoder='ffmpeg_aac'
                         UseRescale='false'
-                        TrackIndex=1
-                        VodTrackIndex=2
-                        Encoder='obs_x264'
+                        ApplyServiceSettings='true'
+                        Track6Bitrate=320
                         RecType='Standard'
-                        RecFilePath='C:\\Users\\dusty\\Videos'
-                        RecFormat2='fragmented_mp4'
                         RecUseRescale='false'
-                        RecTracks=1
-                        RecEncoder='jim_hevc_nvenc'
-                        FLVTrack=1
-                        FFOutputToFile='true'
-                        FFFilePath='C:\\Users\\dusty\\Videos'
-                        FFVBitrate=2500
+                        FFAudioMixes=1
+                        FFAEncoderId=0
+                        Track4Bitrate=320
+                        RecAudioEncoder='ffmpeg_aac'
+                        Track2Bitrate=320
+                        VodTrackIndex=2
                         FFVGOPSize=250
                         FFUseRescale='false'
-                        FFIgnoreCompat='false'
                         FFABitrate=160
-                        FFAudioMixes=1
-                        Track1Bitrate=320
-                        Track2Bitrate=320
-                        Track3Bitrate=320
-                        Track4Bitrate=320
-                        Track5Bitrate=320
-                        Track6Bitrate=320
-                        RecSplitFileTime=15
-                        RecSplitFileSize=2048
-                        RecRBTime=30
-                        RecRBSize=8192
-                        AudioEncoder='ffmpeg_aac'
-                        RecAudioEncoder='ffmpeg_opus'
-                        RecSplitFileType='Time'
+                        FFIgnoreCompat='false'
+                        RecFormat2='mkv'
                         FFVEncoderId=0
-                        FFAEncoderId=0
+                        Track5Bitrate=320
+                        RecRBSize=8192
+                        RecRB='true'
+                        FLVTrack=1
+                        RecTracks=1
+                        Track3Bitrate=320
+                        Encoder='jim_nvenc'
+                        RecEncoder='jim_hevc_nvenc'
+                        FFOutputToFile='true'
+                        FFVBitrate=2500
+                        TrackIndex=1
+                        Track1Bitrate=320
+                        RecRBTime=45
                     }
-                    Hotkeys = @{
-                        ReplayBuffer='{"ReplayBuffer.Save":[{"key":"OBS_KEY_F24"}]}'
+                    Stream1 = @{
+                        IgnoreRecommended='true'
+                    }
+                    Audio = @{
+                        SampleRate=48000
                     }
                 }
                 recordEncoder = @{
+                    bf=0
+                    cqp=20
+                    lookahead='false'
+                    multipass='disabled'
+                    preset2='p5'
+                    psycho_aq='false'
                     rate_control='CQP'
+                    profile='main'
+                }
+                streamEncoder = @{
+                    bitrate=6000
+                    bf=2
+                    psycho_aq='false'
+                    keyint_sec=2
+                    preset='p5'
+                    preset2='p5'
+                    multipass='disabled'
+                    lookahead='disabled'
+                    tune='hq'
+                }
+            }
+            DualPCCPU = @{
+                basic = @{
+                    Video = @{
+                        BaseCX=1920
+                        BaseCY=1080
+                        OutputCX=1920
+                        OutputCY=1080
+                        AutoRemux='false'
+                        FPSType=0
+                        FPSCommon=60
+                        FPSNum=120
+                        ScaleType='bicubic'
+                        FPSInt=30
+                        FPSDen=1
+                        ColorFormat='NV12'
+                        ColorSpace=709
+                        ColorRange='Partial'
+                        SdrWhiteLevel=300
+                        HdrNominalPeakLevel=1000
+                    }
+                    Output = @{
+                        FilenameFormatting='%MM-%DD-%hh-%mm-%ss'
+                        Reconnect='false'
+                        DelayEnable='false'
+                        DelaySec=20
+                        DelayPreserve='true'
+                        RetryDelay=2
+                        MaxRetries=25
+                        BindIP='default'
+                        NewSocketLoopEnable='false'
+                        LowLatencyEnable='false'
+                        Mode='Advanced'
+                    }
+                    AdvOut = @{
+                        AudioEncoder='ffmpeg_aac'
+                        UseRescale='false'
+                        ApplyServiceSettings='true'
+                        Track6Bitrate=320
+                        RecType='Standard'
+                        RecUseRescale='false'
+                        FFAudioMixes=1
+                        FFAEncoderId=0
+                        Track4Bitrate=320
+                        RecAudioEncoder='ffmpeg_aac'
+                        Track2Bitrate=320
+                        VodTrackIndex=2
+                        FFVGOPSize=250
+                        FFUseRescale='false'
+                        FFABitrate=160
+                        FFIgnoreCompat='false'
+                        RecFormat2='mkv'
+                        FFVEncoderId=0
+                        Track5Bitrate=320
+                        RecRBSize=8192
+                        RecRB='true'
+                        FLVTrack=1
+                        RecTracks=1
+                        Track3Bitrate=320
+                        Encoder='obs_x264'
+                        RecEncoder='jim_hevc_nvenc'
+                        FFOutputToFile='true'
+                        FFVBitrate=2500
+                        TrackIndex=1
+                        Track1Bitrate=320
+                        RecRBTime=45
+                    }
+                    Stream1 = @{
+                        IgnoreRecommended='true'
+                    }
+                    Audio = @{
+                        SampleRate=48000
+                    }
+                }
+                recordEncoder = @{
+                    bf=0
                     cqp=16
+                    lookahead='false'
+                    multipass='disabled'
+                    preset2='p7'
+                    psycho_aq='false'
+                    rate_control='CQP'
+                    profile='main'
+                }
+                streamEncoder = @{
+                    bitrate=8250
+                    preset='fast'
+                    profile='high'
+                    keyint_sec=2
+                }
+            }
+            DualPCGPU = @{
+                basic = @{
+                    Video = @{
+                        BaseCX=1920
+                        BaseCY=1080
+                        OutputCX=1920
+                        OutputCY=1080
+                        AutoRemux='false'
+                        FPSType=0
+                        FPSCommon=60
+                        FPSNum=120
+                        ScaleType='bicubic'
+                        FPSInt=30
+                        FPSDen=1
+                        ColorFormat='NV12'
+                        ColorSpace=709
+                        ColorRange='Partial'
+                        SdrWhiteLevel=300
+                        HdrNominalPeakLevel=1000
+                    }
+                    Output = @{
+                        FilenameFormatting='%MM-%DD-%hh-%mm-%ss'
+                        Reconnect='false'
+                        DelayEnable='false'
+                        DelaySec=20
+                        DelayPreserve='true'
+                        RetryDelay=2
+                        MaxRetries=25
+                        BindIP='default'
+                        NewSocketLoopEnable='false'
+                        LowLatencyEnable='false'
+                        Mode='Advanced'
+                    }
+                    AdvOut = @{
+                        AudioEncoder='ffmpeg_aac'
+                        UseRescale='false'
+                        ApplyServiceSettings='true'
+                        Track6Bitrate=320
+                        RecType='Standard'
+                        RecUseRescale='false'
+                        FFAudioMixes=1
+                        FFAEncoderId=0
+                        Track4Bitrate=320
+                        RecAudioEncoder='ffmpeg_aac'
+                        Track2Bitrate=320
+                        VodTrackIndex=2
+                        FFVGOPSize=250
+                        FFUseRescale='false'
+                        FFABitrate=160
+                        FFIgnoreCompat='false'
+                        RecFormat2='mkv'
+                        FFVEncoderId=0
+                        Track5Bitrate=320
+                        RecRBSize=8192
+                        RecRB='true'
+                        FLVTrack=1
+                        RecTracks=1
+                        Track3Bitrate=320
+                        Encoder='jim_nvenc'
+                        RecEncoder='jim_hevc_nvenc'
+                        FFOutputToFile='true'
+                        FFVBitrate=2500
+                        TrackIndex=1
+                        Track1Bitrate=320
+                        RecRBTime=45
+                    }
+                    Stream1 = @{
+                        IgnoreRecommended='true'
+                    }
+                    Audio = @{
+                        SampleRate=48000
+                    }
+                }
+                recordEncoder = @{
+                    bf=0
+                    cqp=16
+                    lookahead='false'
+                    multipass='disabled'
+                    preset2='p7'
+                    psycho_aq='false'
+                    rate_control='CQP'
+                    profile='main'
+                }
+                streamEncoder = @{
+                    bitrate=8250
+                    bf=2
+                    psycho_aq='false'
+                    keyint_sec=2
+                    preset='p7'
                     preset2='p7'
                     multipass='disabled'
-                    psycho_aq='false'
-                    bf=0
+                    lookahead='disabled'
+                    tune='hq'
                 }
             }
-            QuickSync = @{
-
+            '120FPSRB' = @{
                 basic = @{
+                    Video = @{
+                        BaseCX=1920
+                        BaseCY=1080
+                        OutputCX=1920
+                        OutputCY=1080
+                        AutoRemux='false'
+                        FPSType=2
+                        FPSCommon=60
+                        FPSNum=120
+                        ScaleType='bicubic'
+                        FPSInt=30
+                        FPSDen=1
+                        ColorFormat='NV12'
+                        ColorSpace=709
+                        ColorRange='Partial'
+                        SdrWhiteLevel=300
+                        HdrNominalPeakLevel=1000
+                    }
+                    Output = @{
+                        FilenameFormatting='%MM-%DD-%hh-%mm-%ss'
+                        Reconnect='false'
+                        DelayEnable='false'
+                        DelaySec=20
+                        DelayPreserve='true'
+                        RetryDelay=2
+                        MaxRetries=25
+                        BindIP='default'
+                        NewSocketLoopEnable='false'
+                        LowLatencyEnable='false'
+                        Mode='Advanced'
+                    }
                     AdvOut = @{
-                        RecEncoder = 'obs_qsv11'
+                        AudioEncoder='ffmpeg_aac'
+                        UseRescale='false'
+                        Track6Bitrate=320
+                        RecType='Standard'
+                        RecUseRescale='false'
+                        FFAudioMixes=1
+                        FFAEncoderId=0
+                        Track4Bitrate=320
+                        RecAudioEncoder='ffmpeg_aac'
+                        Track2Bitrate=320
+                        FFVGOPSize=250
+                        FFUseRescale='false'
+                        FFABitrate=160
+                        FFIgnoreCompat='false'
+                        RecFormat2='mkv'
+                        FFVEncoderId=0
+                        Track5Bitrate=320
+                        RecRBSize=8192
+                        RecRB='true'
+                        FLVTrack=1
+                        RecTracks=1
+                        Track3Bitrate=320
+                        RecEncoder='jim_hevc_nvenc'
+                        FFOutputToFile='true'
+                        FFVBitrate=2500
+                        TrackIndex=1
+                        Track1Bitrate=320
+                        RecRBTime=45
+                    }
+                    Audio = @{
+                        SampleRate=48000
                     }
                 }
                 recordEncoder = @{
-                    enhancements = 'false'
-                    target_usage = 'speed'
-                    bframes = 0
-                    rate_control = 'ICQ'
-                    bitrate = 16500
-                    icq_quality = 18
-                    keyint_sec = 2
+                    bf=0
+                    cqp=16
+                    lookahead='false'
+                    multipass='disabled'
+                    preset2='p7'
+                    psycho_aq='false'
+                    rate_control='CQP'
+                    profile='main'
                 }
-                
             }
-            x264 = @{
+            '240FPSRB' = @{
                 basic = @{
-                    ADVOut = @{
-                        RecEncoder='obs_x264'
+                    Video = @{
+                        BaseCX=1920
+                        BaseCY=1080
+                        OutputCX=1920
+                        OutputCY=1080
+                        AutoRemux='false'
+                        FPSType=2
+                        FPSCommon=60
+                        FPSNum=240
+                        ScaleType='bicubic'
+                        FPSInt=30
+                        FPSDen=1
+                        ColorFormat='NV12'
+                        ColorSpace=709
+                        ColorRange='Partial'
+                        SdrWhiteLevel=300
+                        HdrNominalPeakLevel=1000
+                    }
+                    Output = @{
+                        FilenameFormatting='%MM-%DD-%hh-%mm-%ss'
+                        Reconnect='false'
+                        DelayEnable='false'
+                        DelaySec=20
+                        DelayPreserve='true'
+                        RetryDelay=2
+                        MaxRetries=25
+                        BindIP='default'
+                        NewSocketLoopEnable='false'
+                        LowLatencyEnable='false'
+                        Mode='Advanced'
+                    }
+                    AdvOut = @{
+                        AudioEncoder='ffmpeg_aac'
+                        UseRescale='false'
+                        Track6Bitrate=320
+                        RecType='Standard'
+                        RecUseRescale='false'
+                        FFAudioMixes=1
+                        FFAEncoderId=0
+                        Track4Bitrate=320
+                        RecAudioEncoder='ffmpeg_aac'
+                        Track2Bitrate=320
+                        FFVGOPSize=250
+                        FFUseRescale='false'
+                        FFABitrate=160
+                        FFIgnoreCompat='false'
+                        RecFormat2='mkv'
+                        FFVEncoderId=0
+                       Track5Bitrate=320
+                        RecRBSize=8192
+                        RecRB='true'
+                        FLVTrack=1
+                        RecTracks=1
+                        Track3Bitrate=320
+                        RecEncoder='jim_hevc_nvenc'
+                        FFOutputToFile='true'
+                        FFVBitrate=2500
+                        TrackIndex=1
+                        Track1Bitrate=320
+                        RecRBTime=45
+                    }
+                    Audio = @{
+                        SampleRate=48000
                     }
                 }
                 recordEncoder = @{
-                    crf=1
-                    keyint_sec=1
-                    preset='ultrafast'
-                    profile='high'
-                    rate_control='CRF'
-                    x264opts='qpmin=15 qpmax=15 ref=0 merange=4 direct=none weightp=0 no-chroma-me'
+                    bf=0
+                    cqp=16
+                    lookahead='false'
+                    multipass='disabled'
+                    preset2='p5'
+                    psycho_aq='false'
+                    rate_control='CQP'
+                    profile='main'  
                 }
             }
         }
     }
-
+    
     # Applies to all patches/presets
     $Global = @{
             basic = @{
@@ -1250,11 +1576,14 @@ OutputCY=$DefaultHeight
         $glob | Out-IniFile -FilePath $global -Force
     }
     Write-Warning "Ignore Error Messages, everything is working lol"
-    Write-Warning "Set a Key to Save Replay in Hotkeys and Push-To-Talk if needed,"
+    Write-Warning "Set a Key to Save Replay in Hotkeys and Push-To-Talk if needed"
     Write-Warning "Set Process Priority to Normal and Disable Browser Source Hardware Acceleration in Advanced"
     Write-Warning "Separate Audio Tracks and Select Which Ones to Record/Stream"
     Write-Warning "Upload Overlays to Streamelements and add Them as Browser Sources to Increase Performance"
     Write-Warning "Right-Click on Sources and Enable 'Close File When Inactive' or 'Unload Image When Not Showing' if Available"
+    Write-Warning "You Can Also Lower the CQP Value if You Want Better Quality (Bigger File Sizes)"
+    Write-Warning "Always Disable Preview for Better Performance Aswell"
+    Write-Warning "OBS Will Now Start at Log on with Replay Buffer Enabled and be Minimized"
         $Path0 = 'C:\Program Files\obs-studio'
         If ((Test-Path $Path0)) {
         $Path1 = "$($env:TEMP)"
