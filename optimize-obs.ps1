@@ -1,24 +1,9 @@
 # couleur's tweaklist compacted into only optimize-obs
 
 using namespace System.Management.Automation # Required by Invoke-NGENpsosh
-Remove-Module TweakList -ErrorAction Ignore
-New-Module TweakList ([ScriptBlock]::Create({
+Remove-Module OptimizeOBS -ErrorAction Ignore
+New-Module OptimizeOBS ([ScriptBlock]::Create({
 
-function Assert-Choice {
-    if (-Not(Get-Command choice.exe -ErrorAction Ignore)){
-        Write-Host "[!] Unable to find choice.exe (it comes with Windows, did a little bit of unecessary debloating?)" -ForegroundColor Red
-        PauseNul
-        exit 1
-    }
-}
-function Assert-Path {
-    param(
-        $Path
-    )
-    if (-Not(Test-Path -Path $Path)) {
-        New-Item -Path $Path -Force | Out-Null
-    }
-}
 function Get-ShortcutTarget {
     [alias('gst')]
 
@@ -32,43 +17,7 @@ function Get-ShortcutTarget {
     
     return (New-Object -ComObject WScript.Shell).CreateShortcut($ShortcutPath).TargetPath
 }
-<#
-	.LINK
-	Frankensteined from Inestic's WindowsFeatures Sophia Script function
-	https://github.com/Inestic
-	https://github.com/farag2/Sophia-Script-for-Windows/blob/06a315c643d5939eae75bf6e24c3f5c6baaf929e/src/Sophia_Script_for_Windows_10/Module/Sophia.psm1#L4946
 
-	.SYNOPSIS
-	User gets a nice checkbox-styled menu in where they can select 
-	
-	.EXAMPLE
-
-	Screenshot: https://i.imgur.com/zrCtR3Y.png
-
-	$ToInstall = Invoke-CheckBox -Items "7-Zip", "PowerShell", "Discord"
-
-	Or you can have each item have a description by passing an array of hashtables:
-
-	$ToInstall = Invoke-CheckBox -Items @(
-
-		@{
-			DisplayName = "7-Zip"
-			# Description = "Cool Unarchiver"
-		},
-		@{
-			DisplayName = "Windows Sandbox"
-			Description = "Windows' Virtual machine"
-		},
-		@{
-			DisplayName = "Firefox"
-			Description = "A great browser"
-		},
-		@{
-			DisplayName = "PowerShell 777"
-			Description = "PowerShell on every system!"
-		}
-	)
-#>
 function Invoke-Checkbox{
 param(
 	$Title = "Select an option",
@@ -86,11 +35,9 @@ if (!$Items.Description){
 
 Add-Type -AssemblyName PresentationCore, PresentationFramework, System.Drawing, System.Windows.Forms, WindowsFormsIntegration
 
-
 # Initialize an array list to store the selected Windows features
 $SelectedFeatures = New-Object -TypeName System.Collections.ArrayList($null)
 $ToReturn = New-Object -TypeName System.Collections.ArrayList($null)
-
 
 #region XAML Markup
 # The section defines the design of the upcoming dialog box
@@ -357,7 +304,6 @@ function Toggle-Selection {
 		}
 	}
 }
-
 
 <#
 $Original = @{
@@ -831,60 +777,6 @@ Function Out-IniFile {
     }
 }
 
-Set-Alias oif Out-IniFile
-
-function Add-ContextMenu {
-    #! TODO https://www.tenforums.com/tutorials/69524-add-remove-drives-send-context-menu-windows-10-a.html
-    param(
-        [ValidateSet(
-            'SendTo',
-            'TakeOwnership',
-            'OpenWithOnBatchFiles',
-            'DrivesInSendTo',
-            'TakeOwnership'
-            )]
-        [Array]$Entries
-    )
-    if (!(Test-Admin)){
-        return 'Changing the context menu / default file extensions requires running as Admin, exitting..'
-
-    }
-
-    if ('SendTo' -in $Entries){
-        New-ItemProperty -Path Registry::HKEY_CLASSES_ROOT\AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo -Name "(default)" -PropertyType String -Value "{7BA4C740-9E81-11CF-99D3-00AA004AE837}" -Force
-    }
-
-    if ('DrivesInSendTo' -in $Entries){
-        Set-ItemProperty "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name NoDrivesInSendToMenu -Value 0
-    }
-
-
-    if ('OpenWithOnBatchFiles' -in $Entries){
-        New-Item -Path "Registry::HKEY_CLASSES_ROOT\batfile\shell\Open with\command" -Force
-        New-Item -Path "Registry::HKEY_CLASSES_ROOT\cmdfile\shell\Open with\command" -Force
-        Set-ItemProperty "Registry::HKEY_CLASSES_ROOT\batfile\shell\Open with\command" -Name "(Default)" -Value "{09799AFB-AD67-11d1-ABCD-00C04FC30936}" -Force
-        Set-ItemProperty "Registry::HKEY_CLASSES_ROOT\batfile\shell\Open with\command" -Name "(Default)" -Value "{09799AFB-AD67-11d1-ABCD-00C04FC30936}" -Force
-
-    }
-
-    if ('TakeOwnership' -in $Entries){
-        '*','Directory' | ForEach-Object {
-            New-Item -Path "Registry::HKEY_CLASSES_ROOT\$_\shell\runas"
-            New-ItemProperty -LiteralPath "Registry::HKEY_CLASSES_ROOT\$_\shell\runas" -Name '(Default)' -Value 'Take Ownership'
-            New-ItemProperty -LiteralPath "Registry::HKEY_CLASSES_ROOT\$_\shell\runas" -Name 'NoWorkingDirectory' -Value ''
-            New-ItemProperty -LiteralPath "Registry::HKEY_CLASSES_ROOT\$_\shell\runas" -Name 'HasLUAShield' -Value ''
-            New-ItemProperty -LiteralPath "Registry::HKEY_CLASSES_ROOT\$_\shell\runas" -Name 'Position' -Value 'Middle'
-            New-ItemProperty -LiteralPath "Registry::HKEY_CLASSES_ROOT\$_\shell\runas" -Name 'AppliesTo' -Value "NOT (System.ItemPathDisplay:=`"$env:HOMEDRIVE\`")"
-
-            New-Item -Path "Registry::HKEY_CLASSES_ROOT\$_\shell\runas\command"
-            $Command = 'cmd.exe /c title Taking ownership.. & mode con:lines=30 cols=150 & takeown /f "%1" && icacls "%1" /grant administrators:F & timeout 2 >nul'
-            New-ItemProperty -LiteralPath "Registry::HKEY_CLASSES_ROOT\$_\shell\runas\command" -Name '(Default)' -Value $Command
-            New-ItemProperty -LiteralPath "Registry::HKEY_CLASSES_ROOT\$_\shell\runas\command" -Name 'IsolatedCommand' -Value $Command
-
-        }
-    }
-
-}
 function Set-CompatibilitySettings {
     [alias('scs')]
     param(
@@ -1291,10 +1183,6 @@ OutputCY=$DefaultHeight
     $FPS = $Basic.Video.FPSNum/$Basic.Video.FPSDen
     $Pixels = [int]$Basic.Video.BaseCX*[int]$Basic.Video.BaseCY
 
-    if (!$Basic.Hotkeys.ReplayBuffer){
-        Write-Warning "Set a Key to Save Replay in Hotkeys and Push-To-Talk if needed, Set Process Priority to Normal and Disable Browser Source Hardware Acceleration in Advanced"
-    }
-
     $Basic = Merge-Hashtables -Original $Basic -Patch $OBSPatches.$Preset.$Encoder.basic -ErrorAction Stop
     Out-IniFile -FilePath "$OBSProfile\basic.ini" -InputObject $Basic -Pretty -Force
 
@@ -1361,7 +1249,29 @@ OutputCY=$DefaultHeight
 
         $glob | Out-IniFile -FilePath $global -Force
     }
-    Write-Host "Finished patching OBS, yay! Please switch profiles or reload OBS to see changes" -ForegroundColor Green
+    Write-Warning "Ignore Error Messages, everything is working lol"
+    Write-Warning "Set a Key to Save Replay in Hotkeys and Push-To-Talk if needed,"
+    Write-Warning "Set Process Priority to Normal and Disable Browser Source Hardware Acceleration in Advanced"
+    Write-Warning "Separate Audio Tracks and Select Which Ones to Record/Stream"
+    Write-Warning "Upload Overlays to Streamelements and add Them as Browser Sources to Increase Performance"
+    Write-Warning "Right-Click on Sources and Enable 'Close File When Inactive' or 'Unload Image When Not Showing' if Available"
+        $Path0 = 'C:\Program Files\obs-studio'
+        If ((Test-Path $Path0)) {
+        $Path1 = "$($env:TEMP)"
+            Invoke-WebRequest -uri "https://github.com/bhopdusty/context-menus/raw/main/files/Other/ReplayBufferPortable.xml" -outfile "$Path1\ReplayBuffer.xml"
+        $Task0 = Get-Content "$Path1\ReplayBuffer.xml" -raw
+            Register-ScheduledTask -Xml "$Task0" -TaskName 'ReplayBuffer'
+            Remove-Item "$Path1\ReplayBuffer.xml"
+        }
+        $Path0 = "$($env:USERPROFILE)"
+        $Path1 = "$Path0\Documents\OBS\ReplayBuffer"
+        If ((Test-Path $Path1)) {
+        $Path2 = "$($env:TEMP)"
+            Invoke-WebRequest -uri "https://github.com/bhopdusty/context-menus/raw/main/files/Other/ReplayBufferPortable.xml" -outfile "$Path2\ReplayBufferPortable.xml"
+        $Task0 = Get-Content "$Path2\ReplayBufferPortable.xml" -raw
+            Register-ScheduledTask -Xml "$Task0" -TaskName 'ReplayBufferPortable'
+            Remove-Item "$Path2\ReplayBufferPortable.xml"
+        }
 }
 Export-ModuleMember * -Alias *
 })) | Import-Module -DisableNameChecking -Global
