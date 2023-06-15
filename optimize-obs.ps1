@@ -806,7 +806,7 @@ function Set-CompatibilitySettings {
     -Name $FilePath.FullName -PropertyType String -Value $Data -Force | Out-Null
 
 }
-function Optimize-OBS {
+function Optimize {
     <#
     .SYNOPSIS
     Display Name: Optimize OBS
