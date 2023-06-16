@@ -1576,7 +1576,6 @@ OutputCY=$DefaultHeight
         $glob | Out-IniFile -FilePath $global -Force
     }
     Write-Warning "Ignore Error Messages, everything is working lol"
-    Write-Warning "Always Run OBS as Admin"
     Write-Warning "Set a Key to Save Replay in Hotkeys and Push-To-Talk if needed"
     Write-Warning "Set Process Priority to Normal and Disable Browser Source Hardware Acceleration in Advanced"
     Write-Warning "Separate Audio Tracks and Select Which Ones to Record/Stream"
@@ -1585,22 +1584,23 @@ OutputCY=$DefaultHeight
     Write-Warning "You Can Also Lower the CQP Value if You Want Better Quality (Bigger File Sizes)"
     Write-Warning "Always Disable Preview for Better Performance Aswell"
     Write-Warning "OBS Will Now Start at Log on with Replay Buffer Enabled and be Minimized"
+    Write-Warning "If you Have Both Portable Replay Buffer and Regular, Open Task Scheduler and Delete the Regular From Startup"
         $Path0 = 'C:\Program Files\obs-studio'
         If ((Test-Path $Path0)) {
-        $Path1 = "$($env:TEMP)"
-            Invoke-WebRequest -uri "https://github.com/bhopdusty/context-menus/raw/main/files/Other/ReplayBufferPortable.xml" -outfile "$Path1\ReplayBuffer.xml"
-        $Task0 = Get-Content "$Path1\ReplayBuffer.xml" -raw
-            Register-ScheduledTask -Xml "$Task0" -TaskName 'ReplayBuffer'
-            Remove-Item "$Path1\ReplayBuffer.xml"
+        $Action = New-ScheduledTaskAction -Execute '"C:\Program Files\obs-studio\bin\64bit\obs64.exe"' -Argument '--startreplaybuffer --minimize-to-tray' -WorkingDirectory 'C:\Program Files\obs-studio\bin\64bit'
+        $Trigger = New-ScheduledTaskTrigger -AtLogOn
+        $Principal = New-ScheduledTaskPrincipal -UserID "$env:COMPUTERNAME\$env:USERNAME" -LogonType ServiceAccount -RunLevel Highest
+        $Settings = New-ScheduledTaskSettingsSet -Compatibility Win8
+        Register-ScheduledTask -TaskName "Log On" -TaskPath "\OBS\ReplayBuffer" -Action $action -Trigger $trigger -Settings $Settings -Principal $Principal
         }
         $Path0 = "$($env:USERPROFILE)"
         $Path1 = "$Path0\Documents\OBS\ReplayBuffer"
         If ((Test-Path $Path1)) {
-        $Path2 = "$($env:TEMP)"
-            Invoke-WebRequest -uri "https://github.com/bhopdusty/context-menus/raw/main/files/Other/ReplayBufferPortable.xml" -outfile "$Path2\ReplayBufferPortable.xml"
-        $Task0 = Get-Content "$Path2\ReplayBufferPortable.xml" -raw
-            Register-ScheduledTask -Xml "$Task0" -TaskName 'ReplayBufferPortable'
-            Remove-Item "$Path2\ReplayBufferPortable.xml"
+        $Action = New-ScheduledTaskAction -Execute '%USERPROFILE%\Documents\OBS\ReplayBuffer\bin\64bit\obs64.exe' -Argument '--startreplaybuffer --minimize-to-tray' -WorkingDirectory '%USERPROFILE%\Documents\OBS\ReplayBuffer\bin\64bit'
+        $Trigger = New-ScheduledTaskTrigger -AtLogOn
+        $Principal = New-ScheduledTaskPrincipal -UserID "$env:COMPUTERNAME\$env:USERNAME" -LogonType ServiceAccount -RunLevel Highest
+        $Settings = New-ScheduledTaskSettingsSet -Compatibility Win8
+        Register-ScheduledTask -TaskName "Log On" -TaskPath "\OBS\ReplayBuffer\Portable" -Action $action -Trigger $trigger -Settings $Settings -Principal $Principal
         }
 }
 Export-ModuleMember * -Alias *
