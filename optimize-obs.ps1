@@ -938,7 +938,7 @@ function Optimize {
                     profile='main'
                 }
                 streamEncoder = @{
-                    bitrate=8250
+                    bitrate=8000
                     bf=2
                     psycho_aq='false'
                     keyint_sec=2
@@ -1014,6 +1014,9 @@ function Optimize {
                         TrackIndex=1
                         Track1Bitrate=320
                         RecRBTime=45
+                    }
+                    SimpleOutput = @{
+                        RecFormat2='mkv'
                     }
                     Stream1 = @{
                         IgnoreRecommended='true'
@@ -1128,7 +1131,7 @@ function Optimize {
                     profile='main'
                 }
                 streamEncoder = @{
-                    bitrate=8250
+                    bitrate=8000
                     preset='fast'
                     profile='high'
                     keyint_sec=2
@@ -1218,7 +1221,7 @@ function Optimize {
                     profile='main'
                 }
                 streamEncoder = @{
-                    bitrate=8250
+                    bitrate=8000
                     bf=2
                     psycho_aq='false'
                     keyint_sec=2
@@ -1584,9 +1587,7 @@ OutputCY=$DefaultHeight
     Write-Warning "You Can Also Lower the CQP Value if You Want Better Quality (Bigger File Sizes)"
     Write-Warning "Always Disable Preview for Better Performance Aswell"
     Write-Warning "OBS Will Now Start at Log on with Replay Buffer Enabled and be Minimized"
-    Write-Warning "If you Have Both Portable Replay Buffer and Regular, Open Task Scheduler and Delete the Regular From Startup
-    $Path0 = 'C:\Program Files\obs-studio'
-    }
+    Write-Warning "If you Have Both Portable Replay Buffer and Regular, Open Task Scheduler and Delete the Regular From Startup"
 }
 Export-ModuleMember * -Alias *
 })) | Import-Module -DisableNameChecking -Global
