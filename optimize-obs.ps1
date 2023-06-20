@@ -1586,8 +1586,6 @@ OutputCY=$DefaultHeight
     Write-Warning "Right-Click on Sources and Enable 'Close File When Inactive' or 'Unload Image When Not Showing' if Available"
     Write-Warning "You Can Also Lower the CQP Value if You Want Better Quality (Bigger File Sizes)"
     Write-Warning "Always Disable Preview for Better Performance Aswell"
-    Write-Warning "OBS Will Now Start at Log on with Replay Buffer Enabled and be Minimized"
-    Write-Warning "If you Have Both Portable Replay Buffer and Regular, Open Task Scheduler and Delete the Regular From Startup"
 }
 Export-ModuleMember * -Alias *
 })) | Import-Module -DisableNameChecking -Global
