@@ -1585,6 +1585,8 @@ OutputCY=$DefaultHeight
     Write-Warning "Always Disable Preview for Better Performance Aswell"
     Write-Warning "OBS Will Now Start at Log on with Replay Buffer Enabled and be Minimized"
     Write-Warning "If you Have Both Portable Replay Buffer and Regular, Open Task Scheduler and Delete the Regular From Startup
+    $Path0 = 'C:\Program Files\obs-studio'
+    }
 }
 Export-ModuleMember * -Alias *
 })) | Import-Module -DisableNameChecking -Global
