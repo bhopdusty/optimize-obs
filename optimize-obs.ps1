@@ -1584,24 +1584,7 @@ OutputCY=$DefaultHeight
     Write-Warning "You Can Also Lower the CQP Value if You Want Better Quality (Bigger File Sizes)"
     Write-Warning "Always Disable Preview for Better Performance Aswell"
     Write-Warning "OBS Will Now Start at Log on with Replay Buffer Enabled and be Minimized"
-    Write-Warning "If you Have Both Portable Replay Buffer and Regular, Open Task Scheduler and Delete the Regular From Startup"
-        $Path0 = 'C:\Program Files\obs-studio'
-        If ((Test-Path $Path0)) {
-        $Action = New-ScheduledTaskAction -Execute '"C:\Program Files\obs-studio\bin\64bit\obs64.exe"' -Argument '--startreplaybuffer --minimize-to-tray' -WorkingDirectory 'C:\Program Files\obs-studio\bin\64bit'
-        $Trigger = New-ScheduledTaskTrigger -AtLogOn
-        $Principal = New-ScheduledTaskPrincipal -UserID "$env:COMPUTERNAME\$env:USERNAME" -LogonType ServiceAccount -RunLevel Highest
-        $Settings = New-ScheduledTaskSettingsSet -Compatibility Win8
-        Register-ScheduledTask -TaskName "Log On" -TaskPath "\OBS\ReplayBuffer" -Action $action -Trigger $trigger -Settings $Settings -Principal $Principal
-        }
-        $Path0 = "$($env:USERPROFILE)"
-        $Path1 = "$Path0\Documents\OBS\ReplayBuffer"
-        If ((Test-Path $Path1)) {
-        $Action = New-ScheduledTaskAction -Execute '%USERPROFILE%\Documents\OBS\ReplayBuffer\bin\64bit\obs64.exe' -Argument '--startreplaybuffer --minimize-to-tray' -WorkingDirectory '%USERPROFILE%\Documents\OBS\ReplayBuffer\bin\64bit'
-        $Trigger = New-ScheduledTaskTrigger -AtLogOn
-        $Principal = New-ScheduledTaskPrincipal -UserID "$env:COMPUTERNAME\$env:USERNAME" -LogonType ServiceAccount -RunLevel Highest
-        $Settings = New-ScheduledTaskSettingsSet -Compatibility Win8
-        Register-ScheduledTask -TaskName "Log On" -TaskPath "\OBS\ReplayBuffer\Portable" -Action $action -Trigger $trigger -Settings $Settings -Principal $Principal
-        }
+    Write-Warning "If you Have Both Portable Replay Buffer and Regular, Open Task Scheduler and Delete the Regular From Startup
 }
 Export-ModuleMember * -Alias *
 })) | Import-Module -DisableNameChecking -Global
